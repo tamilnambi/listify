@@ -39,6 +39,16 @@ dependencies:
   shared_preferences: ^2.3.5
   logger: ^2.5.0
   provider: ^6.1.2
+  icons_launcher: ^3.0.0
+  firebase_auth: ^5.4.0
+
+icons_launcher:
+  image_path: 'assets/logo.png'
+  platforms:
+    android:
+      enable: true
+    ios:
+      enable: true
 
 dev_dependencies:
   flutter_test:
