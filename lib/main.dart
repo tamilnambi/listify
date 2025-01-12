@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:listify/pages/splash_page.dart';
@@ -14,8 +15,7 @@ void main() async {
   );
   await SharedPreferencesService().initPrefs();
   runApp(MultiProvider(
-      providers: ProviderList.getProviders(),
-      child: const MyApp()));
+      providers: ProviderList.getProviders(), child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -24,13 +24,18 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final botToastBuilder = BotToastInit();
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Listify',
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
-      home: const SplashPage()
-    );
+        debugShowCheckedModeBanner: false,
+        navigatorObservers: [BotToastNavigatorObserver()],
+        title: 'Listify',
+        theme: ThemeData(
+          useMaterial3: true,
+        ),
+        builder: (context, widget) {
+          widget = botToastBuilder(context, widget);
+          return widget;
+        },
+        home: const SplashPage());
   }
 }

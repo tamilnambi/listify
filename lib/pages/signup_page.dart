@@ -1,5 +1,8 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:listify/pages/login_page.dart';
+import 'package:listify/services/providers/login_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../util/app_colors.dart';
 import '../util/app_textstyles.dart';
@@ -21,18 +24,75 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     emailController.dispose();
     passwordController.dispose();
+  }
+
+  // Function to validate email and password
+  Future<void> signup() async {
+    String email = emailController.text;
+    String password = passwordController.text;
+
+    // Email validation
+    if (email.isEmpty) {
+      showErrorMessage("Please enter your email");
+      return;
+    }
+
+    String pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+    RegExp regExp = RegExp(pattern);
+    if (!regExp.hasMatch(email)) {
+      showErrorMessage("Enter a valid email address");
+      return;
+    }
+
+    // Password validation
+    if (password.isEmpty) {
+      showErrorMessage("Please enter your password");
+      return;
+    }
+
+    if (password.length < 6) {
+      showErrorMessage("Password must be at least 6 characters long");
+      return;
+    }
+
+    LoginProvider login = Provider.of<LoginProvider>(context, listen: false);
+    await login.signUp(email, password).then(
+        (value){
+          if(login.state == AuthState.success){
+            BotToast.showText(text: "Sign up successful");
+            Navigator.pushAndRemoveUntil(
+              context,
+              CustomPageRoute(
+                page: LoginPage(),
+                transitionType: TransitionType.slideLeft,
+              ),
+                  (route) => false,
+            );
+          }
+          if(login.state == AuthState.failed){
+            showErrorMessage(login.message);
+          }
+        }
+    );
+  }
+
+  // Function to show error messages
+  void showErrorMessage(String message) {
+    //ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message),backgroundColor: Colors.red,duration: Duration(seconds: 3),),);
+    BotToast.showText(text: message);
   }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-        backgroundColor: Colors.white,
-        body: Padding(
+      backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true, // Ensures screen resizes when keyboard opens
+      body: SingleChildScrollView( // Allows screen content to be scrollable
+        child: Padding(
           padding: EdgeInsets.symmetric(horizontal: size.width * 0.1),
           child: Center(
             child: Column(
@@ -41,16 +101,16 @@ class _SignupPageState extends State<SignupPage> {
                 Hero(
                   tag: "splashLogo",
                   child:
-                      Image.asset("assets/logo.png", width: size.width * 0.5),
+                  Image.asset("assets/logo.png", width: size.width * 0.5),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Welcome',
+                  'Join us now!',
                   style: AppTextStyles.heading(context),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Stay productive, one task at a time.',
+                  'Sign up to start your journey.',
                   style: AppTextStyles.subheading(context),
                 ),
                 const SizedBox(height: 20),
@@ -68,7 +128,7 @@ class _SignupPageState extends State<SignupPage> {
                 const SizedBox(height: 20),
                 CustomButton(
                   text: 'Create Account',
-                  onPressed: () {},
+                  onPressed: signup, // Validate and handle signup here
                   color: AppColors.customPink,
                 ),
                 const SizedBox(height: 30),
@@ -87,7 +147,7 @@ class _SignupPageState extends State<SignupPage> {
                         transitionType: TransitionType
                             .slideLeft, // Choose your animation type
                       ),
-                      (route) => false,
+                          (route) => false,
                     );
                   },
                   color: AppColors.customGreen,
@@ -96,6 +156,8 @@ class _SignupPageState extends State<SignupPage> {
               ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
