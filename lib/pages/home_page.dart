@@ -36,17 +36,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     getTasks();
   }
 
-  Future<void> getTasks() async{
+  Future<void> getTasks() async {
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     await taskProvider.fetchTasks().then(
-            (value) {
-          if (taskProvider.state == AuthState.success) {
-            BotToast.showText(text: "Tasks fetched successfully");
-          }
-          if (taskProvider.state == AuthState.failed) {
-            BotToast.showText(text: taskProvider.message);
-          }
+          (value) {
+        if (taskProvider.state == AuthState.success) {
+          BotToast.showText(text: "Tasks fetched successfully");
         }
+        if (taskProvider.state == AuthState.failed) {
+          BotToast.showText(text: taskProvider.message);
+        }
+      },
     );
   }
 
@@ -59,19 +59,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       onConfirm: () async {
         LoginProvider login = Provider.of<LoginProvider>(context, listen: false);
         await login.logOut().then(
-                (value){
-              if(login.state == AuthState.success){
-                BotToast.showText(text: "Logout successful");
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  CustomPageRoute(
-                    page: LoginPage(),
-                    transitionType: TransitionType.slideLeft,
-                  ),
-                      (route) => false,
-                );
-              }
+              (value) {
+            if (login.state == AuthState.success) {
+              BotToast.showText(text: "Logout successful");
+              Navigator.pushAndRemoveUntil(
+                context,
+                CustomPageRoute(
+                  page: LoginPage(),
+                  transitionType: TransitionType.slideLeft,
+                ),
+                    (route) => false,
+              );
             }
+          },
         );
       },
       onCancel: () {
@@ -86,14 +86,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     if (_taskController.text.isNotEmpty) {
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
       await taskProvider.addTask(_taskController.text).then(
-              (value) {
-            if (taskProvider.state == AuthState.success) {
-              BotToast.showText(text: "Task added successfully");
-            }
-            if (taskProvider.state == AuthState.failed) {
-              BotToast.showText(text: taskProvider.message);
-            }
+            (value) {
+          if (taskProvider.state == AuthState.success) {
+            BotToast.showText(text: "Task added successfully");
           }
+          if (taskProvider.state == AuthState.failed) {
+            BotToast.showText(text: taskProvider.message);
+          }
+        },
       );
       _taskController.clear(); // Clear the textfield after adding the task
       _animationController.reverse(); // Collapse the textfield
@@ -109,101 +109,131 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Hero(
-                  tag: "splashLogo",
-                  child: Image.asset("assets/logo.png", width: size.height * 0.1),
-                ),
-                IconButton(
-                  icon: Icon(Icons.logout_outlined, size: 30), // Logout icon
-                  onPressed: _showLogoutConfirmationDialog, // Show the confirmation dialog
-                ),
-              ],
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Consumer<TaskProvider>(
-                  builder: (context, taskProvider, child) {
-                    if (taskProvider.state == AuthState.loading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (taskProvider.state == AuthState.failed) {
-                      return Center(child: Text(taskProvider.message));
-                    }
-                    return ListView.builder(
-                      itemCount: taskProvider.tasks.length,
-                      itemBuilder: (context, index) {
-                        return TaskItem(
-                          taskId: taskProvider.tasks[index]['id'],
-                          taskTitle: taskProvider.tasks[index]['task'],
-                          isCompleted: taskProvider.tasks[index]['completed'],
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            ),
-            // Circular Container with + icon
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isExpanded = !_isExpanded;
-                  if (_isExpanded) {
-                    _animationController.forward(); // Expand
-                  } else {
-                    _animationController.reverse(); // Collapse
-                  }
-                });
-              },
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                width: _isExpanded ? 60 : 70,
-                height: _isExpanded ? 60 : 70,
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: _isExpanded
-                      ? IconButton(
-                    icon: Icon(Icons.keyboard_return, color: Colors.white),
-                    onPressed: _addTask, // Add task when enter is pressed
-                  )
-                      : Icon(Icons.add, color: Colors.white),
-                ),
-              ),
-            ),
-            // Expanding TextField when clicked
-            SizeTransition(
-              sizeFactor: _animation,
-              axisAlignment: -1.0,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-                child: TextField(
-                  controller: _taskController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter your task...',
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.grey[200],
+      body: GestureDetector(
+        onTap: () {
+          if (_isExpanded) {
+            setState(() {
+              _isExpanded = false;
+              _taskController.clear();
+            });
+          }
+        },
+        child: SafeArea(
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Hero(
+                    tag: "splashLogo",
+                    child: Image.asset("assets/logo.png", width: size.height * 0.1),
                   ),
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _addTask(), // Add task when enter is pressed
+                  IconButton(
+                    icon: Icon(Icons.logout_outlined, size: 30),
+                    onPressed: _showLogoutConfirmationDialog,
+                  ),
+                ],
+              ),
+              Expanded(
+                child: Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Consumer<TaskProvider>(
+                        builder: (context, taskProvider, child) {
+                          if (taskProvider.state == AuthState.loading) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+                          if (taskProvider.state == AuthState.failed) {
+                            return Center(child: Text(taskProvider.message));
+                          }
+                          return ListView.builder(
+                            itemCount: taskProvider.tasks.length,
+                            itemBuilder: (context, index) {
+                              return TaskItem(
+                                taskId: taskProvider.tasks[index]['id'],
+                                taskTitle: taskProvider.tasks[index]['task'],
+                                isCompleted: taskProvider.tasks[index]['completed'],
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    if (!_isExpanded) Positioned.fill(
+                      child: Consumer<TaskProvider>(
+                        builder: (context, taskProvider, child) {
+                          return AnimatedAlign(
+                            duration: Duration(milliseconds: 300),
+                            alignment: taskProvider.tasks.isEmpty
+                                ? Alignment.center
+                                : Alignment.bottomCenter,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _isExpanded = true;
+                                });
+                              },
+                              child: Container(
+                                width: 56,
+                                height: 56,
+                                margin: EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(Icons.add, color: Colors.white, size: 30),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                height: _isExpanded ? 80 : 0,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                  child: GestureDetector(
+                    onTap: () {}, // Prevent tap from bubbling up
+                    child: TextField(
+                      controller: _taskController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your task...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(28),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.send),
+                          onPressed: _addTask,
+                        ),
+                      ),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _addTask(),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
 
   @override
   void dispose() {
