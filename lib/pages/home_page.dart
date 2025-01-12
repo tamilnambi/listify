@@ -24,6 +24,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   TextEditingController _taskController = TextEditingController();
 
   bool _isExpanded = false;
+  String? _selectedTaskId;
+
 
   @override
   void initState() {
@@ -111,10 +113,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       backgroundColor: Colors.white,
       body: GestureDetector(
         onTap: () {
-          if (_isExpanded) {
+          if (_selectedTaskId != null) {
             setState(() {
-              _isExpanded = false;
-              _taskController.clear();
+              _selectedTaskId = null;
             });
           }
         },
@@ -150,10 +151,48 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           return ListView.builder(
                             itemCount: taskProvider.tasks.length,
                             itemBuilder: (context, index) {
-                              return TaskItem(
-                                taskId: taskProvider.tasks[index]['id'],
-                                taskTitle: taskProvider.tasks[index]['task'],
-                                isCompleted: taskProvider.tasks[index]['completed'],
+                              final task = taskProvider.tasks[index];
+                              final isSelected = _selectedTaskId == task['id'];
+
+                              return Stack(
+                                children: [
+                                  TaskItem(
+                                    taskId: task['id'],
+                                    taskTitle: task['task'],
+                                    isCompleted: task['completed'],
+                                    onTaskSelected: (selectedTaskId) {
+                                      setState(() {
+                                        _selectedTaskId = selectedTaskId == _selectedTaskId ? null : selectedTaskId;
+                                      });
+                                    },
+                                  ),
+                                  if (isSelected)
+                                    Positioned(
+                                      top: 0,
+                                      right: 0,
+                                      child: Row(
+                                        children: [
+                                          FloatingActionButton(
+                                            mini: true,
+                                            backgroundColor: Colors.yellow,
+                                            onPressed: () {
+                                              // Handle edit
+                                            },
+                                            child: Icon(Icons.edit, color: Colors.black),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          FloatingActionButton(
+                                            mini: true,
+                                            backgroundColor: Colors.red,
+                                            onPressed: () {
+                                              // Handle delete
+                                            },
+                                            child: Icon(Icons.delete, color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
                               );
                             },
                           );
