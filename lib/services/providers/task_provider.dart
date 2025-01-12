@@ -32,7 +32,6 @@ class TaskProvider with ChangeNotifier {
         return;  // Exit early if no userId found
       }
 
-      TaskService taskService = TaskService();
       _tasks = await taskService.fetchTasks(userId);
       _state = AuthState.success;
       notifyListeners();
@@ -45,7 +44,7 @@ class TaskProvider with ChangeNotifier {
   }
 
   // Add a new task for the current authenticated user
-  Future<void> addTask(String title, String description) async {
+  Future<void> addTask(String task) async {
     try {
       _state = AuthState.loading;
       notifyListeners();
@@ -58,8 +57,7 @@ class TaskProvider with ChangeNotifier {
         return;  // Exit early if no userId found
       }
 
-      TaskService taskService = TaskService();
-      await taskService.addTask(userId, title, description);
+      await taskService.addTask(task: task, userId: userId);
       await fetchTasks();  // Reload the tasks after adding
       _state = AuthState.success;
       notifyListeners();
@@ -85,7 +83,6 @@ class TaskProvider with ChangeNotifier {
         return;  // Exit early if no userId found
       }
 
-      TaskService taskService = TaskService();
       await taskService.updateTask(taskId, completed, userId );
       await fetchTasks();  // Reload the tasks after updating
       _state = AuthState.success;
@@ -112,7 +109,6 @@ class TaskProvider with ChangeNotifier {
         return;  // Exit early if no userId found
       }
 
-      TaskService taskService = TaskService();
       await taskService.deleteTask(userId, taskId);
       await fetchTasks();  // Reload the tasks after deletion
       _state = AuthState.success;

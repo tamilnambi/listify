@@ -17,8 +17,7 @@ class TaskService {
           data.forEach((key, value) {
             tasks.add({
               'id': key,
-              'title': value['title'],
-              'description': value['description'],
+              'task': value['task'],
               'completed': value['completed'],
             });
           });
@@ -33,13 +32,15 @@ class TaskService {
   }
 
   // Add a new task
-  Future<void> addTask(String title, String description, String userId) async {
+  Future<void> addTask({
+    required String task,
+    required String userId,
+}) async {
     try {
       final response = await http.post(
         Uri.parse('${Const.BASE_URL}/tasks/$userId.json'),
         body: json.encode({
-          'title': title,
-          'description': description,
+          'task': task,
           'completed': false,
         }),
       );
