@@ -7,6 +7,7 @@ import 'package:listify/util/enums.dart';
 import '../services/providers/login_provider.dart';
 import '../util/custom_pageroute.dart';
 import '../widgets/custom_alert_dialog.dart';
+import '../widgets/task_item.dart';
 import 'login_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -32,6 +33,21 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       vsync: this,
     );
     _animation = Tween<double>(begin: 0.0, end: 200.0).animate(_animationController);
+    getTasks();
+  }
+
+  Future<void> getTasks() async{
+    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+    await taskProvider.fetchTasks().then(
+            (value) {
+          if (taskProvider.state == AuthState.success) {
+            BotToast.showText(text: "Tasks fetched successfully");
+          }
+          if (taskProvider.state == AuthState.failed) {
+            BotToast.showText(text: taskProvider.message);
+          }
+        }
+    );
   }
 
   // Function to show the confirmation dialog
@@ -109,7 +125,31 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
               ],
             ),
-            Spacer(),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Consumer<TaskProvider>(
+                  builder: (context, taskProvider, child) {
+                    if (taskProvider.state == AuthState.loading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (taskProvider.state == AuthState.failed) {
+                      return Center(child: Text(taskProvider.message));
+                    }
+                    return ListView.builder(
+                      itemCount: taskProvider.tasks.length,
+                      itemBuilder: (context, index) {
+                        return TaskItem(
+                          taskId: taskProvider.tasks[index]['id'],
+                          taskTitle: taskProvider.tasks[index]['task'],
+                          isCompleted: taskProvider.tasks[index]['completed'],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
             // Circular Container with + icon
             GestureDetector(
               onTap: () {
