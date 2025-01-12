@@ -1,7 +1,8 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:listify/util/app_textstyles.dart';
 import 'package:provider/provider.dart';
-import 'package:listify/services/providers/task_provider.dart';  // Make sure to import the task provider
+import 'package:listify/services/providers/task_provider.dart'; // Make sure to import the task provider
 import 'package:listify/util/enums.dart';
 
 import '../services/providers/login_provider.dart';
@@ -17,9 +18,11 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
+  bool completed = false;
 
   TextEditingController _taskController = TextEditingController();
 
@@ -33,7 +36,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _animation = Tween<double>(begin: 0.0, end: 200.0).animate(_animationController);
+    _animation =
+        Tween<double>(begin: 0.0, end: 200.0).animate(_animationController);
     getTasks();
   }
 
@@ -41,17 +45,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void _closeTextField() {
     setState(() {
       _isExpanded = false;
-      _taskController.clear();  // Clear the text when closing the text field
+      _taskController.clear(); // Clear the text when closing the text field
     });
   }
 
-  Future<void> getTasks() async {
+  Future<void> getTasks({bool completed = false}) async {
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-    await taskProvider.fetchTasks().then(
-          (value) {
-        if (taskProvider.state == AuthState.success) {
-          BotToast.showText(text: "Tasks fetched successfully");
-        }
+    await taskProvider.fetchTasks(completed: completed).then(
+      (value) {
+        // if (taskProvider.state == AuthState.success) {
+        //   BotToast.showText(text: "Tasks fetched successfully");
+        // }
         if (taskProvider.state == AuthState.failed) {
           BotToast.showText(text: taskProvider.message);
         }
@@ -65,9 +69,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       title: 'Confirm Logout',
       message: 'Are you sure you want to log out?',
       onConfirm: () async {
-        LoginProvider login = Provider.of<LoginProvider>(context, listen: false);
+        LoginProvider login =
+            Provider.of<LoginProvider>(context, listen: false);
         await login.logOut().then(
-              (value) {
+          (value) {
             if (login.state == AuthState.success) {
               BotToast.showText(text: "Logout successful");
               Navigator.pushAndRemoveUntil(
@@ -76,7 +81,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   page: LoginPage(),
                   transitionType: TransitionType.slideLeft,
                 ),
-                    (route) => false,
+                (route) => false,
               );
             }
           },
@@ -94,9 +99,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       title: 'Confirm Delete',
       message: 'Are you sure you want to delete the task?',
       onConfirm: () async {
-        TaskProvider taskProvider = Provider.of<TaskProvider>(context, listen: false);
+        TaskProvider taskProvider =
+            Provider.of<TaskProvider>(context, listen: false);
         await taskProvider.deleteTask(_selectedTaskId!).then(
-              (value) {
+          (value) {
             if (taskProvider.state == AuthState.success) {
               BotToast.showText(text: "Task deleted successfully");
             }
@@ -105,6 +111,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             }
           },
         );
+        await getTasks(completed: completed);
         setState(() {
           _selectedTaskId = null;
         });
@@ -119,9 +126,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     if (_taskController.text.isNotEmpty) {
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
       if (_selectedTaskId != null) {
-        await taskProvider.updateTaskText(
-            _selectedTaskId!, _taskController.text).then(
-              (value) {
+        await taskProvider
+            .updateTaskText(_selectedTaskId!, _taskController.text)
+            .then(
+          (value) {
             if (taskProvider.state == AuthState.success) {
               BotToast.showText(text: "Task updated successfully");
             }
@@ -132,7 +140,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         );
       } else {
         await taskProvider.addTask(_taskController.text).then(
-              (value) {
+          (value) {
             if (taskProvider.state == AuthState.success) {
               BotToast.showText(text: "Task added successfully");
             }
@@ -144,6 +152,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       }
     }
     _closeTextField();
+    FocusScope.of(context).unfocus(); // Close the keyboard
+    await getTasks(completed: completed);
   }
 
   @override
@@ -168,9 +178,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Hero(
-                    tag: "splashLogo",
-                    child: Image.asset("assets/logo.png", width: size.height * 0.1),
+                  Row(
+                    children: [
+                      Hero(
+                        tag: "splashLogo",
+                        child: Image.asset("assets/logo.png",
+                            width: size.height * 0.1),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Listify',
+                        style: AppTextStyles.heading(context),
+                      )
+                    ],
                   ),
                   IconButton(
                     icon: Icon(Icons.logout_outlined, size: 30),
@@ -186,7 +206,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       child: Consumer<TaskProvider>(
                         builder: (context, taskProvider, child) {
                           if (taskProvider.state == AuthState.loading) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const Center(
+                                child: CircularProgressIndicator());
                           }
                           if (taskProvider.state == AuthState.failed) {
                             return Center(child: Text(taskProvider.message));
@@ -205,7 +226,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                     isCompleted: task['completed'],
                                     onTaskSelected: (selectedTaskId) {
                                       setState(() {
-                                        _selectedTaskId = selectedTaskId == _selectedTaskId ? null : selectedTaskId;
+                                        _selectedTaskId =
+                                            selectedTaskId == _selectedTaskId
+                                                ? null
+                                                : selectedTaskId;
                                       });
                                     },
                                   ),
@@ -221,20 +245,24 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                             onPressed: () {
                                               // Load the task into the textfield for editing
                                               setState(() {
-                                                _taskController.text = task['task'];
+                                                _taskController.text =
+                                                    task['task'];
                                               });
                                               setState(() {
                                                 _isExpanded = true;
                                               });
                                             },
-                                            child: Icon(Icons.edit, color: Colors.black),
+                                            child: Icon(Icons.edit,
+                                                color: Colors.black),
                                           ),
                                           const SizedBox(width: 8),
                                           FloatingActionButton(
                                             mini: true,
                                             backgroundColor: Colors.red,
-                                            onPressed: _showDeleteConfirmationDialog,
-                                            child: Icon(Icons.delete, color: Colors.white),
+                                            onPressed:
+                                                _showDeleteConfirmationDialog,
+                                            child: Icon(Icons.delete,
+                                                color: Colors.white),
                                           ),
                                         ],
                                       ),
@@ -246,42 +274,86 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         },
                       ),
                     ),
-                    if (!_isExpanded) Positioned.fill(
-                      child: Consumer<TaskProvider>(
-                        builder: (context, taskProvider, child) {
-                          return AnimatedAlign(
-                            duration: Duration(milliseconds: 300),
-                            alignment: taskProvider.tasks.isEmpty
-                                ? Alignment.center
-                                : Alignment.bottomCenter,
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _isExpanded = true;
-                                });
-                              },
-                              child: Container(
-                                width: 56,
-                                height: 56,
-                                margin: EdgeInsets.only(bottom: 16),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[300],
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      blurRadius: 8,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
+                    if (!_isExpanded)
+                      Positioned.fill(
+                        child: Consumer<TaskProvider>(
+                          builder: (context, taskProvider, child) {
+                            return AnimatedAlign(
+                              duration: Duration(milliseconds: 300),
+                              alignment: taskProvider.tasks.isEmpty
+                                  ? Alignment.center
+                                  : Alignment.bottomCenter,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _isExpanded = true;
+                                  });
+                                },
+                                child: Container(
+                                  width: 56,
+                                  height: 56,
+                                  margin: EdgeInsets.only(bottom: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        blurRadius: 8,
+                                        offset: Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(Icons.add,
+                                      color: Colors.white, size: 30),
                                 ),
-                                child: Icon(Icons.add, color: Colors.white, size: 30),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
+                    Positioned(
+                        bottom: 100,
+                        left: 0,
+                        right: 0,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              getTasks(completed: !completed);
+                              setState(() {
+                                completed = !completed;
+                              });
+                            },
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Divider(
+                                    thickness: 1,
+                                    color: Colors
+                                        .grey, // You can change the color of the line
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10.0),
+                                  child: Text(
+                                      !completed
+                                          ? 'Completed Tasks'
+                                          : 'Incomplete Tasks',
+                                      style: AppTextStyles.body(context)),
+                                ),
+                                Expanded(
+                                  child: Divider(
+                                    thickness: 1,
+                                    color: Colors
+                                        .grey, // You can change the color of the line
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ))
                   ],
                 ),
               ),
@@ -289,7 +361,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 duration: Duration(milliseconds: 300),
                 height: _isExpanded ? 80 : 0,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0, vertical: 10),
                   child: GestureDetector(
                     onTap: () {}, // Prevent tap from bubbling up
                     child: TextField(

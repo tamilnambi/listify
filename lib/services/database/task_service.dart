@@ -7,10 +7,16 @@ import '../../util/const.dart';
 class TaskService {
 
   // Fetch tasks from the database for a specific user
-  Future<List<Map<String, dynamic>>> fetchTasks(String userId) async {
+  Future<List<Map<String, dynamic>>> fetchTasks(String userId, {bool? completed}) async {
     try {
-      final response = await http.get(Uri.parse('${Const.BASE_URL}/tasks/$userId.json'));
-
+      // Build the URL to include the completed filter if provided
+      String url = '${Const.BASE_URL}/tasks/$userId.json';
+      if (completed != null) {
+        url += '?orderBy="completed"&equalTo=$completed';  // Add completed query parameter if specified
+      }
+      AppLogger().logInfo('Fetching tasks from: $url');
+      final response = await http.get(Uri.parse(url));
+      AppLogger().logInfo('Response Body: ${response.body}');
       if (response.statusCode == 200) {
         // Check if the response body is empty or null
         if (response.body.isEmpty || response.body == 'null') {
@@ -37,6 +43,7 @@ class TaskService {
       throw Exception('Error fetching tasks: $e');
     }
   }
+
 
 
   // Add a new task

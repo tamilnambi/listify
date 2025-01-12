@@ -32,7 +32,7 @@ class AppTextStyles {
     return GoogleFonts.openSans(
       fontSize: responsiveSize(context, 16), // Base size: 16
       fontWeight: FontWeight.normal,
-      color: Colors.black87,
+      color: Colors.black54,
     );
   }
 

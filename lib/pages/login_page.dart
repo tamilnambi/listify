@@ -32,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
 
   // Function to validate email and password
   Future<void> login() async {
+    FocusScope.of(context).unfocus(); // Close the keyboard
     String email = emailController.text;
     String password = passwordController.text;
 

@@ -69,17 +69,18 @@ class _TaskItemState extends State<TaskItem> with SingleTickerProviderStateMixin
           child: Row(
             children: [
               GestureDetector(
-                onTap: () {
-                  taskProvider.toggleTaskCompletion(widget.taskId, !widget.isCompleted).then(
+                onTap: () async {
+                  await taskProvider.toggleTaskCompletion(widget.taskId, !widget.isCompleted).then(
                         (value) {
                       if (taskProvider.state == AuthState.success) {
-                        BotToast.showText(text: "Task updated successfully");
+                        //BotToast.showText(text: "Task updated successfully");
                       }
                       if (taskProvider.state == AuthState.failed) {
                         BotToast.showText(text: taskProvider.message);
                       }
                     },
                   );
+                  await taskProvider.fetchTasks(completed: widget.isCompleted);
                 },
                 child: Container(
                   width: 30.0,

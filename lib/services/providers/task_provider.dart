@@ -19,7 +19,7 @@ class TaskProvider with ChangeNotifier {
   String get message => _message;
 
   // Fetch tasks for the current authenticated user
-  Future<void> fetchTasks() async {
+  Future<void> fetchTasks({bool? completed}) async {
     try {
       _state = AuthState.loading;
       notifyListeners();
@@ -32,7 +32,8 @@ class TaskProvider with ChangeNotifier {
         return;  // Exit early if no userId found
       }
 
-      _tasks = await taskService.fetchTasks(userId);
+      // Modify the service call to include the completed parameter
+      _tasks = await taskService.fetchTasks(userId, completed: completed);
       _state = AuthState.success;
       notifyListeners();
     } catch (e) {
@@ -42,6 +43,7 @@ class TaskProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
 
   // Add a new task for the current authenticated user
   Future<void> addTask(String task) async {
@@ -58,7 +60,7 @@ class TaskProvider with ChangeNotifier {
       }
 
       await taskService.addTask(task: task, userId: userId);
-      await fetchTasks();  // Reload the tasks after adding
+      //await fetchTasks();  // Reload the tasks after adding
       _state = AuthState.success;
       notifyListeners();
     } catch (e) {
@@ -84,7 +86,7 @@ class TaskProvider with ChangeNotifier {
       }
 
       await taskService.updateTask(taskId, completed, userId );
-      await fetchTasks();  // Reload the tasks after updating
+      //await fetchTasks();  // Reload the tasks after updating
       _state = AuthState.success;
       notifyListeners();
     } catch (e) {
@@ -110,7 +112,7 @@ class TaskProvider with ChangeNotifier {
       }
 
       await taskService.updateTaskText(taskId, task, userId );
-      await fetchTasks();  // Reload the tasks after updating
+      //await fetchTasks();  // Reload the tasks after updating
       _state = AuthState.success;
       notifyListeners();
     } catch (e) {
@@ -137,7 +139,7 @@ class TaskProvider with ChangeNotifier {
       }
 
       await taskService.deleteTask(userId, taskId);
-      await fetchTasks();  // Reload the tasks after deletion
+      //await fetchTasks();  // Reload the tasks after deletion
       _state = AuthState.success;
       AppLogger().logInfo('Task deleted');
       notifyListeners();
