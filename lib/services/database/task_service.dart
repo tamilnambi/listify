@@ -79,6 +79,24 @@ class TaskService {
     }
   }
 
+  // Update the task text
+  Future<void> updateTaskText(String id, String task, String userId) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('${Const.BASE_URL}/tasks/$userId/$id.json'),
+        body: json.encode({
+          'task': task,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to update task');
+      }
+    } catch (e) {
+      throw Exception('Error updating task: $e');
+    }
+  }
+
   // Delete a task
   Future<void> deleteTask(String userId, String id) async {
     try {

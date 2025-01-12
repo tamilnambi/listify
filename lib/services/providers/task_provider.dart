@@ -95,6 +95,32 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
+  //update the task text
+  Future<void> updateTaskText(String taskId, String task) async {
+    try {
+      _state = AuthState.loading;
+      notifyListeners();
+
+      final String? userId = SharedPreferencesService.prefs!.getString(SharedPreferencesService.userId);
+      if (userId == null) {
+        _state = AuthState.failed;
+        _message = 'User ID not found';
+        notifyListeners();
+        return;  // Exit early if no userId found
+      }
+
+      await taskService.updateTaskText(taskId, task, userId );
+      await fetchTasks();  // Reload the tasks after updating
+      _state = AuthState.success;
+      notifyListeners();
+    } catch (e) {
+      _state = AuthState.failed;
+      _message = e.toString();
+      AppLogger().logError('Error updating task: $e');
+      notifyListeners();
+    }
+  }
+
   // Delete a task
   Future<void> deleteTask(String taskId) async {
     try {

@@ -26,7 +26,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   bool _isExpanded = false;
   String? _selectedTaskId;
 
-
   @override
   void initState() {
     super.initState();
@@ -36,6 +35,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
     _animation = Tween<double>(begin: 0.0, end: 200.0).animate(_animationController);
     getTasks();
+  }
+
+  // Function to hide the text field and show the + icon
+  void _closeTextField() {
+    setState(() {
+      _isExpanded = false;
+      _taskController.clear();  // Clear the text when closing the text field
+    });
   }
 
   Future<void> getTasks() async {
@@ -52,7 +59,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  // Function to show the logout confirmation dialog
   void _showLogoutConfirmationDialog() {
     CustomConfirmationDialog.show(
       context: context,
@@ -82,7 +88,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  // Function to show the delete task confirmation dialog
   void _showDeleteConfirmationDialog() {
     CustomConfirmationDialog.show(
       context: context,
@@ -110,26 +115,35 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  // Function to add a task
   Future<void> _addTask() async {
     if (_taskController.text.isNotEmpty) {
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-      await taskProvider.addTask(_taskController.text).then(
-            (value) {
-          if (taskProvider.state == AuthState.success) {
-            BotToast.showText(text: "Task added successfully");
-          }
-          if (taskProvider.state == AuthState.failed) {
-            BotToast.showText(text: taskProvider.message);
-          }
-        },
-      );
-      _taskController.clear(); // Clear the textfield after adding the task
-      _animationController.reverse(); // Collapse the textfield
-      setState(() {
-        _isExpanded = false;
-      });
+      if (_selectedTaskId != null) {
+        await taskProvider.updateTaskText(
+            _selectedTaskId!, _taskController.text).then(
+              (value) {
+            if (taskProvider.state == AuthState.success) {
+              BotToast.showText(text: "Task updated successfully");
+            }
+            if (taskProvider.state == AuthState.failed) {
+              BotToast.showText(text: taskProvider.message);
+            }
+          },
+        );
+      } else {
+        await taskProvider.addTask(_taskController.text).then(
+              (value) {
+            if (taskProvider.state == AuthState.success) {
+              BotToast.showText(text: "Task added successfully");
+            }
+            if (taskProvider.state == AuthState.failed) {
+              BotToast.showText(text: taskProvider.message);
+            }
+          },
+        );
+      }
     }
+    _closeTextField();
   }
 
   @override
@@ -144,6 +158,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             setState(() {
               _selectedTaskId = null;
             });
+          } else {
+            _closeTextField(); // Close text field when tapping outside
           }
         },
         child: SafeArea(
@@ -203,7 +219,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                             mini: true,
                                             backgroundColor: Colors.yellow,
                                             onPressed: () {
-                                              // Handle edit
+                                              // Load the task into the textfield for editing
+                                              setState(() {
+                                                _taskController.text = task['task'];
+                                              });
+                                              setState(() {
+                                                _isExpanded = true;
+                                              });
                                             },
                                             child: Icon(Icons.edit, color: Colors.black),
                                           ),
@@ -297,7 +319,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       ),
     );
   }
-
 
   @override
   void dispose() {
