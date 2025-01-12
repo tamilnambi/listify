@@ -11,17 +11,23 @@ class TaskService {
       final response = await http.get(Uri.parse('${Const.BASE_URL}/tasks/$userId.json'));
 
       if (response.statusCode == 200) {
-        Map<String, dynamic> data = json.decode(response.body);
-        List<Map<String, dynamic>> tasks = [];
-        if (data != null) {
-          data.forEach((key, value) {
-            tasks.add({
-              'id': key,
-              'task': value['task'],
-              'completed': value['completed'],
-            });
-          });
+        // Check if the response body is empty or null
+        if (response.body.isEmpty || response.body == 'null') {
+          return []; // Return an empty list if the response body is empty or null
         }
+
+        // Parse the response body if it contains data
+        Map<String, dynamic> data = json.decode(response.body);
+
+        List<Map<String, dynamic>> tasks = [];
+        data.forEach((key, value) {
+          tasks.add({
+            'id': key,
+            'task': value['task'],
+            'completed': value['completed'],
+          });
+        });
+
         return tasks;
       } else {
         throw Exception('Failed to load tasks');
@@ -30,6 +36,7 @@ class TaskService {
       throw Exception('Error fetching tasks: $e');
     }
   }
+
 
   // Add a new task
   Future<void> addTask({
