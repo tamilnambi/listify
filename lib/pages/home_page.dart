@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  // Function to show the confirmation dialog
+  // Function to show the logout confirmation dialog
   void _showLogoutConfirmationDialog() {
     CustomConfirmationDialog.show(
       context: context,
@@ -78,7 +78,34 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       },
       onCancel: () {
         // Handle the cancel action
-        print('Logout canceled');
+      },
+    );
+  }
+
+  // Function to show the delete task confirmation dialog
+  void _showDeleteConfirmationDialog() {
+    CustomConfirmationDialog.show(
+      context: context,
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to delete the task?',
+      onConfirm: () async {
+        TaskProvider taskProvider = Provider.of<TaskProvider>(context, listen: false);
+        await taskProvider.deleteTask(_selectedTaskId!).then(
+              (value) {
+            if (taskProvider.state == AuthState.success) {
+              BotToast.showText(text: "Task deleted successfully");
+            }
+            if (taskProvider.state == AuthState.failed) {
+              BotToast.showText(text: taskProvider.message);
+            }
+          },
+        );
+        setState(() {
+          _selectedTaskId = null;
+        });
+      },
+      onCancel: () {
+        // Handle the cancel action
       },
     );
   }
@@ -169,7 +196,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                   if (isSelected)
                                     Positioned(
                                       top: 0,
-                                      right: 0,
+                                      right: 10,
                                       child: Row(
                                         children: [
                                           FloatingActionButton(
@@ -184,9 +211,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                           FloatingActionButton(
                                             mini: true,
                                             backgroundColor: Colors.red,
-                                            onPressed: () {
-                                              // Handle delete
-                                            },
+                                            onPressed: _showDeleteConfirmationDialog,
                                             child: Icon(Icons.delete, color: Colors.white),
                                           ),
                                         ],

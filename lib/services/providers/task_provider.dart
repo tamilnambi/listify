@@ -105,6 +105,7 @@ class TaskProvider with ChangeNotifier {
       if (userId == null) {
         _state = AuthState.failed;
         _message = 'User ID not found';
+        AppLogger().logError('User ID not found');
         notifyListeners();
         return;  // Exit early if no userId found
       }
@@ -112,6 +113,7 @@ class TaskProvider with ChangeNotifier {
       await taskService.deleteTask(userId, taskId);
       await fetchTasks();  // Reload the tasks after deletion
       _state = AuthState.success;
+      AppLogger().logInfo('Task deleted');
       notifyListeners();
     } catch (e) {
       _state = AuthState.failed;

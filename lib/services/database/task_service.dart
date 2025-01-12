@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:listify/util/app_logger.dart';
 
 import '../../util/const.dart';
 
@@ -79,10 +80,12 @@ class TaskService {
   }
 
   // Delete a task
-  Future<void> deleteTask(String id, String userId) async {
+  Future<void> deleteTask(String userId, String id) async {
     try {
+      AppLogger().logInfo('Deleting task with ID: $id for user: $userId');
       final response = await http.delete(Uri.parse('${Const.BASE_URL}/tasks/$userId/$id.json'));
-
+      AppLogger().logInfo('Status Code: ${response.statusCode}');
+      AppLogger().logInfo('Response Body: ${response.body}');
       if (response.statusCode != 200) {
         throw Exception('Failed to delete task');
       }
