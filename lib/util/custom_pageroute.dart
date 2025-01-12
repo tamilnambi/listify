@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'enums.dart'; // Ensure you have the `TransitionType` enum defined.
 
 class CustomPageRoute extends PageRouteBuilder {
@@ -60,6 +59,22 @@ class CustomPageRoute extends PageRouteBuilder {
           return FadeTransition(
             opacity: animation.drive(
               Tween(begin: 0.0, end: 1.0)
+                  .chain(CurveTween(curve: Curves.easeInOut)),
+            ),
+            child: child,
+          );
+        case TransitionType.slideDown:
+          return SlideTransition(
+            position: animation.drive(
+              Tween(begin: const Offset(0.0, -1.0), end: Offset.zero)
+                  .chain(CurveTween(curve: Curves.easeInOut)),
+            ),
+            child: child,
+          );
+        case TransitionType.slideUp:
+          return SlideTransition(
+            position: animation.drive(
+              Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)
                   .chain(CurveTween(curve: Curves.easeInOut)),
             ),
             child: child,

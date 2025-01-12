@@ -7,4 +7,4 @@ enum AuthState {
   none,
 }
 
-enum TransitionType { slideRight, slideLeft, flip, fade }
+enum TransitionType { slideRight, slideLeft, flip, fade, slideDown, slideUp }

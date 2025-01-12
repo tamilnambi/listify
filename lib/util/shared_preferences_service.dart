@@ -7,6 +7,7 @@ import 'app_logger.dart';
 class SharedPreferencesService {
   static SharedPreferences? prefs;
   static String isLoggedIn = "is_logged_in";
+  static String userId = "user_id";
 
   Future<void> initPrefs() async {
     prefs = await SharedPreferences.getInstance();

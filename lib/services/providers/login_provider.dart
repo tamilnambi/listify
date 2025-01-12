@@ -49,6 +49,8 @@ class LoginProvider with ChangeNotifier{
       );
       _state = AuthState.success;
       SharedPreferencesService.prefs!.setBool(SharedPreferencesService.isLoggedIn, true);
+      SharedPreferencesService.prefs!.setString(SharedPreferencesService.userId, userCredential.user!.uid);
+      AppLogger().logInfo('User ID: ${userCredential.user!.uid}');
       _message = 'Login successful!';
       notifyListeners();
       return userCredential.user;
@@ -69,7 +71,7 @@ class LoginProvider with ChangeNotifier{
       notifyListeners();
       await _auth.signOut();
       _state = AuthState.success;
-      SharedPreferencesService.prefs!.setBool(SharedPreferencesService.isLoggedIn, false);
+      SharedPreferencesService().clearAllValues();
       _message = 'Logged out successfully!';
       notifyListeners();
     } catch (e) {
