@@ -212,6 +212,9 @@ class _HomePageState extends State<HomePage>
                           if (taskProvider.state == AuthState.failed) {
                             return Center(child: Text(taskProvider.message));
                           }
+                          if(taskProvider.tasks.isEmpty && (taskProvider.state == AuthState.success)){
+                            return Center(child: Text('No tasks found'));
+                          }
                           return ListView.builder(
                             itemCount: taskProvider.tasks.length,
                             itemBuilder: (context, index) {
@@ -225,6 +228,7 @@ class _HomePageState extends State<HomePage>
                                     taskTitle: task['task'],
                                     isCompleted: task['completed'],
                                     onTaskSelected: (selectedTaskId) {
+                                      _closeTextField();
                                       setState(() {
                                         _selectedTaskId =
                                             selectedTaskId == _selectedTaskId
@@ -277,85 +281,79 @@ class _HomePageState extends State<HomePage>
                   ],
                 ),
               ),
-              Positioned(
-                  bottom: 100,
-                  left: 0,
-                  right: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        getTasks(completed: !completed);
-                        setState(() {
-                          completed = !completed;
-                        });
-                      },
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Divider(
-                              thickness: 1,
-                              color: Colors
-                                  .grey, // You can change the color of the line
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10.0),
-                            child: Text(
-                                !completed
-                                    ? 'Completed Tasks'
-                                    : 'Incomplete Tasks',
-                                style: AppTextStyles.body(context)),
-                          ),
-                          Expanded(
-                            child: Divider(
-                              thickness: 1,
-                              color: Colors
-                                  .grey, // You can change the color of the line
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )),
-              if (!_isExpanded)
-                Positioned.fill(
-                  child: Consumer<TaskProvider>(
-                    builder: (context, taskProvider, child) {
-                      return AnimatedAlign(
-                        duration: Duration(milliseconds: 300),
-                        alignment: taskProvider.tasks.isEmpty
-                            ? Alignment.center
-                            : Alignment.bottomCenter,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isExpanded = true;
-                            });
-                          },
-                          child: Container(
-                            width: 56,
-                            height: 56,
-                            margin: EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Icon(Icons.add,
-                                color: Colors.white, size: 30),
-                          ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: GestureDetector(
+                  onTap: () {
+                    getTasks(completed: !completed);
+                    setState(() {
+                      completed = !completed;
+                    });
+                  },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          thickness: 1,
+                          color: Colors
+                              .grey, // You can change the color of the line
                         ),
-                      );
-                    },
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0),
+                        child: Text(
+                            !completed
+                                ? 'switch to completed tasks'
+                                : 'switch to incomplete tasks',
+                            style: AppTextStyles.body(context)),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          thickness: 1,
+                          color: Colors
+                              .grey, // You can change the color of the line
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+              ),
+              if (!_isExpanded)
+                Consumer<TaskProvider>(
+                  builder: (context, taskProvider, child) {
+                    return AnimatedAlign(
+                      duration: Duration(milliseconds: 300),
+                      alignment: taskProvider.tasks.isEmpty
+                          ? Alignment.center
+                          : Alignment.bottomCenter,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isExpanded = true;
+                          });
+                        },
+                        child: Container(
+                          width: 56,
+                          height: 56,
+                          margin: EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Icon(Icons.add,
+                              color: Colors.white, size: 30),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               AnimatedContainer(
                 duration: Duration(milliseconds: 300),
