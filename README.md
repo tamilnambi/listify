@@ -40,10 +40,21 @@ This app enables users to manage their tasks effortlessly while ensuring a seaml
 
 ---
 
-## 🗂️ **Screenshots**  
-![Screenshot_20250113_115601](https://github.com/user-attachments/assets/f5bcd072-d860-4246-bf96-753104c1a6c0)
-![Screenshot_20250113_115553](https://github.com/user-attachments/assets/dfe97ec3-706e-493f-9ff0-6d07b57bc405)
-![Screenshot_20250113_115513](https://github.com/user-attachments/assets/0b705bfb-aeee-4959-bb79-da97bf221b43)
-![Screenshot_20250113_115528](https://github.com/user-attachments/assets/93299da8-1632-4f1b-a3c1-d6cb4d1a8ddd)
-![Screenshot_20250113_115543](https://github.com/user-attachments/assets/6dde0ffd-9911-415b-b3fb-d898bfc314f9)
+## 📱 Screenshots
+
+### Home Screen
+<img src="https://github.com/user-attachments/assets/f5bcd072-d860-4246-bf96-753104c1a6c0" alt="Home Screen" width="300"/>
+
+### Task List
+<img src="https://github.com/user-attachments/assets/dfe97ec3-706e-493f-9ff0-6d07b57bc405" alt="Task List" width="300"/>
+
+### Add Task
+<img src="https://github.com/user-attachments/assets/0b705bfb-aeee-4959-bb79-da97bf221b43" alt="Add Task" width="300"/>
+
+### Edit Task
+<img src="https://github.com/user-attachments/assets/93299da8-1632-4f1b-a3c1-d6cb4d1a8ddd" alt="Edit Task" width="300"/>
+
+### Delete Task
+<img src="https://github.com/user-attachments/assets/6dde0ffd-9911-415b-b3fb-d898bfc314f9" alt="Delete Task" width="300"/>
+
 
